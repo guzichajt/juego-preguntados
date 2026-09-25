@@ -570,7 +570,7 @@
         <h1>Preguntados</h1>
     </div>
 
-    <!-- BOTONERA SUPERIOR CON COLOR NARANJA PARA LA RACHA -->
+    <!-- BOTONERA SUPERIOR CON COLORES DISTINTIVOS Y FUEGUITO NARANJA -->
     <div class="scoreboard" id="scoreboard" style="display: none;">
         <div class="score-box" id="player-indicator" style="display:none; color:white; border-color:transparent;"></div>
         
@@ -728,13 +728,31 @@
             }
         }
 
+        function guardarPartidaLocal() {
+            const estadoPartida = {
+                numJugadores,
+                jugadores,
+                turnoActual,
+                dificultad,
+                tiempoMaximo,
+                multiplicadorPuntos
+            };
+            localStorage.setItem("preguntados_partida_activa", JSON.stringify(estadoPartida));
+        }
+
         function mostrarMenuJugadores() {
+            localStorage.removeItem("preguntados_partida_activa");
             actualizarMascota('neutral');
             document.getElementById('scoreboard').style.display = 'none';
+            
+            let partidaGuardada = localStorage.getItem("preguntados_partida_activa");
+            let continuarBtnHtml = partidaGuardada ? `<button class="btn-accion" style="background: linear-gradient(180deg, #f59e0b 0%, #d97706 100%); box-shadow: 0 5px 0px #b45309;" onclick="playClick(); cargarPartidaLocal()">▶️ Continuar Partida</button>` : '';
+
             document.getElementById('app').innerHTML = `
                 <div class="menu-container">
                     <h2 style="color: #1e293b; margin-top:0; margin-bottom:12px; font-size:32px; font-weight:700;">Modo de Juego</h2>
                     <div class="selector-grid">
+                        ${continuarBtnHtml}
                         <button class="btn-accion" style="background: linear-gradient(180deg, #60a5fa 0%, #3b82f6 100%); box-shadow: 0 5px 0px #2563eb;" onclick="playClick(); mostrarMenuDificultad(1)">👤 1 Jugador</button>
                         <button class="btn-accion" style="background: linear-gradient(180deg, #f87171 0%, #ef4444 100%); box-shadow: 0 5px 0px #dc2626;" onclick="playClick(); mostrarMenuDificultad(2)">👥 2 Jugadores</button>
                         <button class="btn-accion" style="background: linear-gradient(180deg, #34d399 0%, #10b981 100%); box-shadow: 0 5px 0px #059669;" onclick="playClick(); mostrarPromptMultiplayer()">👨‍👩‍👧‍👦 Multijugador (3 a 5)</button>
@@ -743,6 +761,26 @@
                     </div>
                 </div>
             `;
+        }
+
+        function cargarPartidaLocal() {
+            let data = localStorage.getItem("preguntados_partida_activa");
+            if (!data) return;
+            try {
+                let parsed = JSON.parse(data);
+                numJugadores = parsed.numJugadores;
+                jugadores = parsed.jugadores;
+                turnoActual = parsed.turnoActual;
+                dificultad = parsed.dificultad;
+                tiempoMaximo = parsed.tiempoMaximo;
+                multiplicadorPuntos = parsed.multiplicadorPuntos;
+
+                document.getElementById('scoreboard').style.display = 'flex';
+                mostrarPantallaRuleta();
+            } catch(e) {
+                localStorage.removeItem("preguntados_partida_activa");
+                mostrarMenuJugadores();
+            }
         }
 
         function mostrarPromptMultiplayer() {
@@ -832,6 +870,7 @@
             }
             turnoActual = 0;
 
+            guardarPartidaLocal();
             document.getElementById('scoreboard').style.display = 'flex';
             mostrarPantallaRuleta();
         }
@@ -875,6 +914,7 @@
                 turnoActual = (turnoActual + 1) % numJugadores;
             } while(jugadores[turnoActual].vidas <= 0);
 
+            guardarPartidaLocal();
             mostrarPantallaRuleta();
         }
 
@@ -982,39 +1022,81 @@
             await cargarPreguntaPorCategoria(cat);
         }
 
+        // --- VALIDACIÓN DE CONTRATO Y GESTIÓN DE ERRORES/TIMEOUTS (Puerto 8001 vía localhost) ---
+        function validarContratoPregunta(data) {
+            if (!data || typeof data !== 'object') return false;
+            if (!data.pregunta || typeof data.pregunta !== 'string') return false;
+            if (!Array.isArray(data.opciones) || data.opciones.length < 2) return false;
+            return true;
+        }
+
+        async function fetchConTimeout(url, opciones = {}, timeout = 5000) {
+            const controller = new AbortController();
+            const id = setTimeout(() => controller.abort(), timeout);
+            try {
+                const response = await fetch(url, { ...opciones, signal: controller.signal });
+                clearTimeout(id);
+                return response;
+            } catch (err) {
+                clearTimeout(id);
+                throw err;
+            }
+        }
+
         async function cargarPreguntaPorCategoria(cat) {
             respondido = false;
+            
+            const contenedor = document.getElementById('app');
+            contenedor.innerHTML = `
+                <div class="menu-container" style="padding: 40px;">
+                    <div class="mascota-avatar" style="font-size: 60px; margin-bottom: 15px;">🤔</div>
+                    <h2 style="color: #1e293b; margin: 0; font-size: 28px;">Buscando pregunta de ${cat}...</h2>
+                    <p style="color: #64748b; font-size: 16px; margin-top: 10px;">Conectando con el servidor...</p>
+                </div>
+            `;
+
             try {
-                const respuesta = await fetch(`http://127.0.0.1:8000/question/random?categoria=${encodeURIComponent(cat)}`);
-                if (!respuesta.ok) throw new Error("No hay preguntas para esta categoría");
+                const respuesta = await fetchConTimeout(`http://localhost:8001/question/random?categoria=${encodeURIComponent(cat)}`, {}, 5000);
+                if (!respuesta.ok) throw new Error("Error HTTP: " + respuesta.status);
                 
                 const data = await respuesta.json();
+                if (!validarContratoPregunta(data)) throw new Error("Contrato de pregunta inválido");
                 
                 preguntaActual = {
-                    categoria: data.categoria,
+                    id: data.id || 1,
+                    categoria: data.categoria || cat,
                     pregunta: data.pregunta,
                     opciones: data.opciones,
-                    respuesta: data.respuesta
+                    respuesta: data.respuesta || data.correcta || data.opciones[0]
                 };
-                
                 mostrarPregunta();
             } catch (error) {
-                console.warn("Buscando pregunta aleatoria general debido a un error:", error);
+                console.warn("Fallo específico por categoría, intentando comodín general:", error);
                 try {
-                    const respuestaAlt = await fetch('http://127.0.0.1:8000/question/random');
+                    const respuestaAlt = await fetchConTimeout('http://localhost:8001/question/random', {}, 5000);
+                    if (!respuestaAlt.ok) throw new Error("Error HTTP alternativo");
+                    
                     const dataAlt = await respuestaAlt.json();
+                    if (!validarContratoPregunta(dataAlt)) throw new Error("Contrato alternativo inválido");
                     
                     preguntaActual = {
-                        categoria: dataAlt.categoria,
+                        id: dataAlt.id || 1,
+                        categoria: dataAlt.categoria || cat,
                         pregunta: dataAlt.pregunta,
                         opciones: dataAlt.opciones,
-                        respuesta: dataAlt.respuesta
+                        respuesta: dataAlt.respuesta || dataAlt.correcta || dataAlt.opciones[0]
                     };
-                    
                     mostrarPregunta();
                 } catch (e) {
-                    console.error("Error crítico al conectar con el backend:", e);
-                    alert("Asegúrate de tener encendido el servidor backend con uvicorn en la terminal.");
+                    contenedor.innerHTML = `
+                        <div class="menu-container" style="border: 3px solid #f43f5e; background: #fff1f2;">
+                            <h2 style="color: #e11d48; margin-top: 0; font-size: 30px;">⚠️ Error de Conexión</h2>
+                            <p style="color: #475569; font-size: 16px; margin: 15px 0;">No se pudo comunicar con el servidor FastAPI (o la solicitud tardó demasiado).</p>
+                            <p style="color: #64748b; font-size: 14px; margin-bottom: 20px;">Verifica que el servidor backend esté encendido en <code>http://localhost:8001</code>.</p>
+                            <button class="btn-accion" style="background: linear-gradient(180deg, #f87171 0%, #ef4444 100%); box-shadow: 0 5px 0px #dc2626;" onclick="cargarPreguntaPorCategoria('${cat}')">🔄 Reintentar</button>
+                            <button class="btn-accion" style="background: transparent; color: #64748b; box-shadow: none; border: 2px solid #cbd5e1; margin-top: 10px;" onclick="mostrarPantallaRuleta()">⬅️ Volver a la Ruleta</button>
+                        </div>
+                    `;
                 }
             }
         }
@@ -1131,6 +1213,7 @@
             playLose();
             actualizarMascota('triste');
             actualizarUI();
+            guardarPartidaLocal();
 
             const card = document.querySelector('.card');
             if (card) {
@@ -1192,6 +1275,7 @@
                 
                 j.puntos += puntosTotales;
                 actualizarUI();
+                guardarPartidaLocal();
 
                 if (j.racha > 1) {
                     feedback.style.color = '#10b981';
@@ -1211,6 +1295,7 @@
                 feedback.textContent = '¡Incorrecto! ❌ (-1 Vida)';
                 j.vidas--;
                 actualizarUI();
+                guardarPartidaLocal();
 
                 const card = document.querySelector('.card');
                 if (card) {
@@ -1225,6 +1310,7 @@
 
         function mostrarGameOverGeneral() {
             clearInterval(temporizador);
+            localStorage.removeItem("preguntados_partida_activa");
             playLose();
             actualizarMascota('triste');
             document.getElementById('scoreboard').style.display = 'none';
