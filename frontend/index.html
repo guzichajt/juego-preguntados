@@ -1,0 +1,1302 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Preguntados - Edición Máxima Perfeccionada</title>
+    <!-- Google Fonts: Fredoka y Lilita One -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Lilita+One&display=swap" rel="stylesheet">
+    <!-- Librería de Confeti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        /* Corrección de caja para centrado perfecto */
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-gradient: radial-gradient(circle at 50% 30%, #1e1b4b 0%, #0f172a 70%, #020617 100%);
+            --card-bg: rgba(255, 255, 255, 0.98);
+            --primary: #6366f1;
+            --success: #10b981;
+            --danger: #f43f5e;
+            --text-main: #1e293b;
+        }
+
+        body {
+            font-family: 'Fredoka', sans-serif;
+            text-align: center;
+            background: var(--bg-gradient);
+            margin: 0;
+            padding: 5px 15px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translate(0, 0); }
+            20% { transform: translate(-8px, 0); }
+            40% { transform: translate(8px, 0); }
+            60% { transform: translate(-6px, 0); }
+            80% { transform: translate(6px, 0); }
+        }
+        .shake { animation: shake 0.4s ease-in-out; }
+
+        /* Fondo de estrellas TITILANDO */
+        .stars {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            overflow: hidden;
+            z-index: -1;
+        }
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle infinite ease-in-out;
+        }
+        @keyframes twinkle {
+            0% { opacity: 0.1; transform: scale(0.5); box-shadow: 0 0 0px rgba(255,255,255,0); }
+            50% { opacity: 1; transform: scale(1.4); box-shadow: 0 0 10px 2px rgba(255,255,255,0.9); }
+            100% { opacity: 0.1; transform: scale(0.5); box-shadow: 0 0 0px rgba(255,255,255,0); }
+        }
+
+        /* --- TÍTULO GIGANTE CON LILITA ONE --- */
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 5px;
+        }
+
+        .mascota-avatar {
+            font-size: 48px;
+            cursor: pointer;
+            animation: floatMascot 3s ease-in-out infinite;
+            filter: drop-shadow(0 6px 12px rgba(0,0,0,0.5));
+            transition: transform 0.2s;
+        }
+        .mascota-avatar:hover { transform: scale(1.2) rotate(10deg); }
+
+        @keyframes floatMascot {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+        }
+
+        h1 {
+            margin: 0;
+            font-family: 'Lilita One', cursive; 
+            font-size: 60px; 
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            background: linear-gradient(180deg, #fffde7 0%, #fff176 40%, #ffb300 75%, #ff8f00 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            -webkit-text-stroke: 2px #ffffff;
+            filter: drop-shadow(0 8px 0px #d84315) drop-shadow(0 12px 15px rgba(0,0,0,0.5));
+            animation: pulseTitle 2s infinite alternate ease-in-out;
+            line-height: 1.1;
+        }
+
+        @keyframes pulseTitle {
+            0% { transform: scale(1); filter: drop-shadow(0 8px 0px #d84315) drop-shadow(0 12px 15px rgba(0,0,0,0.5)); }
+            100% { transform: scale(1.04); filter: drop-shadow(0 8px 0px #d84315) drop-shadow(0 12px 25px rgba(255, 179, 0, 0.6)); }
+        }
+
+        /* --- SCOREBOARD CRISTALINO --- */
+        .scoreboard {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 15px;
+            font-size: 16px; 
+            font-weight: 700;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .score-box {
+            background: linear-gradient(180deg, rgba(255,255,255,0.25) 0%, rgba(255,255,255,0.05) 100%);
+            border: 3px solid rgba(255, 255, 255, 0.4); 
+            padding: 8px 20px; 
+            border-radius: 9999px;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4), inset 0 4px 8px rgba(255,255,255,0.5);
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-shadow: 0 2px 5px rgba(0,0,0,0.8); 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            letter-spacing: 0.5px;
+        }
+        .score-box:hover { 
+            background: rgba(255, 255, 255, 0.35); 
+            transform: translateY(-4px) scale(1.05); 
+            border-color: rgba(255,255,255,0.9);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6), inset 0 4px 10px rgba(255,255,255,0.8);
+        }
+
+        #player-indicator {
+            border-color: rgba(255,255,255,0.8);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.5), inset 0 4px 10px rgba(255,255,255,0.6);
+            font-size: 18px; 
+            padding: 8px 24px;
+        }
+
+        /* --- TARJETA PRINCIPAL --- */
+        .card, .menu-container, .gameover-container {
+            background: var(--card-bg);
+            color: var(--text-main);
+            padding: 20px 35px;
+            border-radius: 35px;
+            box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.8), inset 0 0 0 4px rgba(255, 255, 255, 0.5);
+            width: 100%;
+            max-width: 650px; 
+            max-height: 90vh; 
+            overflow-y: auto;
+            text-align: left;
+            animation: cardAppear 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.1); 
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .card::-webkit-scrollbar { width: 8px; }
+        .card::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+
+        .menu-container, .gameover-container { text-align: center; }
+
+        @keyframes cardAppear {
+            from { opacity: 0; transform: translateY(40px) scale(0.9); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* --- RULETA INMERSIVA --- */
+        .ruleta-pantalla-inmersiva {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            animation: cardAppear 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+        }
+
+        .ruleta-pantalla-inmersiva h2 {
+            margin: 0 0 15px 0;
+            color: #ffffff;
+            font-family: 'Lilita One', cursive; 
+            font-size: 38px; 
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.8), 0 2px 5px rgba(0,0,0,0.5);
+        }
+
+        .ruleta-wrapper {
+            position: relative;
+            width: 320px;
+            height: 320px;
+            margin: 5px auto;
+        }
+
+        .ruleta-pointer {
+            position: absolute;
+            top: -22px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-top: 35px solid #f43f5e;
+            z-index: 30;
+            filter: drop-shadow(0 6px 10px rgba(244, 63, 94, 0.9));
+        }
+
+        .ruleta-rueda {
+            width: 100%;
+            height: 100%;
+            border: 14px solid #ffffff;
+            border-radius: 50%;
+            position: relative;
+            background: conic-gradient(
+                #f43f5e 0deg 45deg,
+                #fbbf24 45deg 90deg,
+                #10b981 90deg 135deg,
+                #3b82f6 135deg 180deg,
+                #8b5cf6 180deg 225deg,
+                #f59e0b 225deg 270deg,
+                #ec4899 270deg 315deg,
+                #14b8a6 315deg 360deg
+            );
+            box-shadow: 
+                0 30px 70px rgba(0, 0, 0, 0.8), 
+                inset 0 0 45px rgba(0,0,0,0.5),
+                inset 0 8px 25px rgba(255,255,255,0.4);
+            transition: transform 3.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        .ruleta-icono {
+            position: absolute;
+            font-size: 40px; 
+            width: 65px;     
+            height: 65px;    
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3), inset 0 3px 10px rgba(255,255,255,0.9);
+            backdrop-filter: blur(3px);
+            filter: drop-shadow(0 3px 6px rgba(0,0,0,0.4));
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .ruleta-centro {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: radial-gradient(circle at 30% 30%, #ffffff 0%, #f1f5f9 60%, #cbd5e1 100%);
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5), inset 0 -4px 10px rgba(0,0,0,0.15);
+            border: 6px solid #f8fafc;
+            z-index: 20;
+            cursor: pointer;
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .ruleta-centro:hover { transform: translate(-50%, -50%) scale(1.15); }
+        .ruleta-centro:active { transform: translate(-50%, -50%) scale(0.95); }
+
+        .willy-girar { 
+            font-size: 26px; 
+            font-weight: 900; 
+            color: #0f172a; 
+            letter-spacing: 1px;
+            margin: 0;
+        }
+
+        /* BANNER DE CATEGORÍA FLOTANTE */
+        #categoria-elegida {
+            margin: 15px 0 0 0;
+            min-height: 55px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .cat-badge-text {
+            font-family: 'Lilita One', cursive;
+            background: rgba(15, 23, 42, 0.65); 
+            padding: 8px 25px;
+            border-radius: 9999px;
+            border: 4px solid; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6); 
+            animation: popBadge 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes popBadge {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .texto-girando {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 20px;
+            color: #cbd5e1;
+            font-weight: 600;
+            letter-spacing: 1px;
+            animation: pulseText 1s infinite alternate;
+        }
+
+        @keyframes pulseText {
+            from { opacity: 0.6; }
+            to { opacity: 1; }
+        }
+
+        /* --- MENÚ JUGADORES Y DIFICULTAD --- */
+        .selector-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 15px;
+            width: 100%;
+        }
+
+        /* --- GRID HORIZONTAL COMPACTO PARA EL COMODÍN --- */
+        .comodin-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: stretch;
+            gap: 10px;
+            margin-top: 15px;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .btn-categoria-sel {
+            padding: 12px 8px;
+            border: 2px solid rgba(255,255,255,0.4);
+            border-radius: 18px;
+            font-weight: 700;
+            font-size: 15px;
+            color: white;
+            cursor: pointer;
+            font-family: 'Fredoka', sans-serif;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            transition: all 0.15s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            flex: 1 1 calc(25% - 15px);
+            min-width: 105px;
+            max-width: 140px;
+        }
+        .btn-categoria-sel:hover { transform: translateY(-3px) scale(1.05); filter: brightness(1.15); box-shadow: 0 8px 15px rgba(0,0,0,0.4); }
+        .btn-categoria-sel:active { transform: translateY(4px); box-shadow: 0 2px 0px rgba(0,0,0,0.3) !important; }
+
+        /* --- PREGUNTAS Y OPCIONES COMPACTADAS --- */
+        .header-pregunta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+
+        .categoria-badge {
+            background: #e0e7ff;
+            color: #4338ca;
+            padding: 8px 18px;
+            border-radius: 9999px;
+            font-size: 14px; 
+            font-weight: 700;
+            text-transform: uppercase;
+            border: 2px solid #c7d2fe;
+        }
+
+        .timer {
+            font-weight: 700;
+            color: #e11d48;
+            font-size: 16px; 
+            background: #fff1f2;
+            padding: 8px 16px;
+            border-radius: 9999px;
+            border: 2px solid #fda4af;
+        }
+        .timer.danger { background: #f43f5e; color: white; border-color: #be123c; animation: pulseTimer 0.4s infinite alternate; }
+
+        @keyframes pulseTimer { from { transform: scale(1); } to { transform: scale(1.15); } }
+
+        .pregunta-texto {
+            font-size: 24px; 
+            color: var(--text-main);
+            margin-bottom: 15px;
+            font-weight: 700;
+            line-height: 1.3;
+            text-align: center;
+            text-wrap: balance;
+        }
+
+        .opcion {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            padding: 14px 20px;
+            font-size: 18px; 
+            margin: 6px 0; 
+            cursor: pointer;
+            border: 2px solid #cbd5e1;
+            border-radius: 9999px;
+            background: #ffffff;
+            color: var(--text-main);
+            font-weight: 600;
+            font-family: 'Fredoka', sans-serif;
+            box-shadow: 0 5px 0px #cbd5e1, 0 8px 12px rgba(0,0,0,0.1);
+            position: relative;
+            z-index: 10;
+            transition: transform 0.1s, box-shadow 0.1s, background 0.2s;
+        }
+        .tecla-badge {
+            background: #f1f5f9;
+            color: #64748b;
+            font-size: 13px;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-weight: 700;
+            border: 2px solid #cbd5e1;
+        }
+
+        .opcion:hover:not(:disabled) {
+            background: #f8fafc;
+            border-color: #94a3b8;
+            box-shadow: 0 5px 0px #94a3b8, 0 8px 15px rgba(0,0,0,0.15);
+            transform: translateY(-2px);
+        }
+        .opcion:active:not(:disabled) {
+            transform: translateY(4px);
+            box-shadow: 0 1px 0px #cbd5e1, 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .opcion:disabled { cursor: default; }
+
+        .opcion.correcta {
+            background: var(--success) !important;
+            color: white !important;
+            border-color: #059669 !important;
+            box-shadow: 0 5px 0px #047857, 0 8px 15px rgba(16, 185, 129, 0.4) !important;
+            transform: translateY(-2px);
+        }
+        .opcion.correcta .tecla-badge { background: rgba(255,255,255,0.2); color: white; border-color: transparent; }
+
+        .opcion.incorrecta {
+            background: var(--danger) !important;
+            color: white !important;
+            border-color: #e11d48 !important;
+            box-shadow: 0 5px 0px #be123c, 0 8px 15px rgba(244, 63, 94, 0.4) !important;
+            transform: translateY(-2px);
+        }
+        .opcion.incorrecta .tecla-badge { background: rgba(255,255,255,0.2); color: white; border-color: transparent; }
+
+        /* Botones Acción Generales */
+        .btn-accion {
+            width: 100%;
+            padding: 13px 15px; 
+            background: linear-gradient(180deg, #6366f1 0%, #4f46e5 100%);
+            color: white;
+            border: none;
+            border-radius: 9999px;
+            cursor: pointer;
+            font-size: 17px; 
+            font-weight: 700;
+            font-family: 'Fredoka', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 0px;
+            box-shadow: 0 5px 0px #3730a3, 0 8px 15px rgba(99, 102, 241, 0.4);
+            transition: transform 0.1s, box-shadow 0.1s, filter 0.2s;
+        }
+        .btn-accion:hover:not(:disabled) { transform: translateY(-2px); filter: brightness(1.1); }
+        .btn-accion:active:not(:disabled) { transform: translateY(4px); box-shadow: 0 1px 0px #3730a3, 0 3px 6px rgba(99, 102, 241, 0.4); }
+        .btn-accion:disabled { cursor: not-allowed; }
+
+        .btn-comodin {
+            background: linear-gradient(180deg, #fbbf24 0%, #f59e0b 100%);
+            box-shadow: 0 5px 0px #d97706, 0 10px 20px rgba(245, 158, 11, 0.5);
+            margin-bottom: 8px; 
+            color: #78350f;
+        }
+
+        .btn-continuar {
+            background: linear-gradient(180deg, #34d399 0%, #10b981 100%);
+            box-shadow: 0 5px 0px #059669, 0 10px 20px rgba(16, 185, 129, 0.5);
+            display: block !important;
+            margin-top: 10px;
+        }
+
+        .mensaje-feedback {
+            margin-top: 10px;
+            font-size: 22px;
+            font-weight: 700;
+            text-align: center;
+            min-height: 28px;
+            letter-spacing: 0.5px;
+            animation: bounceFeedback 0.4s ease;
+        }
+
+        @keyframes bounceFeedback {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.06); }
+        }
+
+        .stats-box {
+            background: #f8fafc;
+            border-radius: 20px;
+            padding: 15px;
+            margin: 15px 0;
+            text-align: left;
+            font-size: 16px;
+            color: #475569;
+            border: 2px solid #e2e8f0;
+        }
+
+        input[type="text"], input[type="number"] {
+            width: 100%;
+            padding: 14px;
+            border: 3px solid #cbd5e1;
+            border-radius: 9999px;
+            font-size: 16px;
+            font-family: 'Fredoka', sans-serif;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 12px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        input[type="text"]:focus, input[type="number"]:focus { border-color: #6366f1; }
+        
+        .botones-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .botones-row {
+            display: flex;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="stars" id="stars-container"></div>
+
+    <div class="logo-container">
+        <div class="mascota-avatar" id="mascota" onclick="tocarMascota()" title="¡Tócame!">🎯</div>
+        <h1>Preguntados</h1>
+    </div>
+
+    <!-- BOTONERA SUPERIOR CON COLOR NARANJA PARA LA RACHA -->
+    <div class="scoreboard" id="scoreboard" style="display: none;">
+        <div class="score-box" id="player-indicator" style="display:none; color:white; border-color:transparent;"></div>
+        
+        <!-- Puntos: Ámbar / Dorado -->
+        <div class="score-box" style="background: linear-gradient(180deg, rgba(251,191,36,0.3) 0%, rgba(251,191,36,0.1) 100%); border-color: #fbbf24;">⭐ Puntos: <span id="puntuacion">0</span></div>
+        
+        <!-- Racha: Naranja Fuego Vibrante -->
+        <div class="score-box" id="racha-box" style="display:none; background: linear-gradient(180deg, rgba(249,115,22,0.35) 0%, rgba(249,115,22,0.1) 100%); border-color: #f97316;">🔥 Racha: <span id="racha-val">0</span></div>
+        
+        <!-- Vidas: Rojo Carmesí -->
+        <div class="score-box" style="background: linear-gradient(180deg, rgba(239,68,68,0.3) 0%, rgba(239,68,68,0.1) 100%); border-color: #ef4444;">Vidas: <span id="vidas">❤️❤️❤️</span></div>
+        
+        <!-- Sonido: Azul Suave -->
+        <div class="score-box" id="btn-sound" style="background: linear-gradient(180deg, rgba(59,130,246,0.3) 0%, rgba(59,130,246,0.1) 100%); border-color: #3b82f6;" onclick="toggleSound()">🔊 Sonido: ON</div>
+        
+        <!-- Música: Morado Suave -->
+        <div class="score-box" id="btn-music" style="background: linear-gradient(180deg, rgba(168,85,247,0.3) 0%, rgba(168,85,247,0.1) 100%); border-color: #a855f7;" onclick="toggleMusic()">🎵 Música: OFF</div>
+    </div>
+
+    <div id="app"></div>
+
+    <script>
+        const starsContainer = document.getElementById('stars-container');
+        for (let i = 0; i < 50; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            star.style.top = `${Math.random() * 100}%`;
+            star.style.left = `${Math.random() * 100}%`;
+            star.style.width = `${Math.random() * 4 + 1}px`;
+            star.style.height = star.style.width;
+            star.style.animationDuration = `${Math.random() * 3 + 1.5}s`;
+            star.style.animationDelay = `${Math.random() * 2}s`;
+            starsContainer.appendChild(star);
+        }
+
+        const sectores = [
+            { nombre: "Geografía", tipo: "normal", color: "#f43f5e", sombra: "#be123c", icono: "🌎" },
+            { nombre: "Comodín", tipo: "comodin", color: "#fbbf24", sombra: "#d97706", icono: "🃏" },
+            { nombre: "Arte", tipo: "normal", color: "#10b981", sombra: "#047857", icono: "🎨" },
+            { nombre: "Ciencia", tipo: "normal", color: "#3b82f6", sombra: "#1d4ed8", icono: "🔬" },
+            { nombre: "Matemáticas", tipo: "normal", color: "#8b5cf6", sombra: "#6d28d9", icono: "📐" },
+            { nombre: "Historia", tipo: "normal", color: "#f59e0b", sombra: "#b45309", icono: "⏳" },
+            { nombre: "Deportes", tipo: "normal", color: "#ec4899", sombra: "#be185d", icono: "🏆" },
+            { nombre: "Tecnología", tipo: "normal", color: "#14b8a6", sombra: "#0f766e", icono: "🤖" }
+        ];
+
+        let numJugadores = 1;
+        let jugadores = [];
+        let turnoActual = 0;
+        
+        let dificultad = "normal";
+        let tiempoMaximo = 15;
+        let multiplicadorPuntos = 1;
+        let soundEnabled = true;
+        let musicEnabled = false;
+        let bgmTimeout = null;
+
+        let preguntaActual = null;
+        let respondido = false;
+        let gradosTotales = 0;
+        let temporizador = null;
+        let tiempoRestante = 15;
+
+        function toggleFullscreen() {
+            playClick();
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {});
+            } else {
+                if (document.exitFullscreen) document.exitFullscreen();
+            }
+        }
+
+        function actualizarMascota(estado) {
+            const mascotEl = document.getElementById('mascota');
+            if (!mascotEl) return;
+            if (estado === 'feliz') mascotEl.textContent = '🥳';
+            else if (estado === 'triste') mascotEl.textContent = '😢';
+            else if (estado === 'pensando') mascotEl.textContent = '🤔';
+            else mascotEl.textContent = '🎯';
+        }
+
+        function tocarMascota() {
+            playWin();
+            confetti({ particleCount: 50, spread: 60, origin: { y: 0.3 }, zIndex: 9999 });
+        }
+
+        // --- AUDIO ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playTone(freq, type, duration, vol=0.3) {
+            if (!soundEnabled && type !== 'bgm') return;
+            if (type === 'bgm' && !musicEnabled) return;
+            try {
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type === 'bgm' ? 'triangle' : type;
+                osc.frequency.value = freq;
+                gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch (e) {}
+        }
+        function playTic(urgente = false) { 
+            playTone(urgente ? 1100 : 800, 'square', 0.05, urgente ? 0.15 : 0.1); 
+        }
+        function playClick() { playTone(600, 'sine', 0.08, 0.2); }
+        
+        function playWin() {
+            setTimeout(() => playTone(440, 'sine', 0.2, 0.3), 0);
+            setTimeout(() => playTone(554, 'sine', 0.2, 0.3), 100);
+            setTimeout(() => playTone(659, 'sine', 0.2, 0.3), 200);
+            setTimeout(() => playTone(880, 'sine', 0.4, 0.4), 300);
+        }
+        function playLose() {
+            setTimeout(() => playTone(300, 'sawtooth', 0.2, 0.3), 0);
+            setTimeout(() => playTone(280, 'sawtooth', 0.2, 0.3), 150);
+            setTimeout(() => playTone(250, 'sawtooth', 0.4, 0.3), 300);
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            document.getElementById('btn-sound').textContent = soundEnabled ? "🔊 Sonido: ON" : "🔇 Sonido: OFF";
+            playClick();
+        }
+
+        const bgmMelody = [
+            {f: 261.63, d: 0.25}, {f: 329.63, d: 0.25}, {f: 392.00, d: 0.25}, {f: 523.25, d: 0.50},
+            {f: 392.00, d: 0.25}, {f: 329.63, d: 0.25}, {f: 261.63, d: 0.50}, {f: 293.66, d: 0.25},
+            {f: 349.23, d: 0.25}, {f: 440.00, d: 0.25}, {f: 587.33, d: 0.50}, {f: 440.00, d: 0.25},
+            {f: 349.23, d: 0.25}, {f: 293.66, d: 0.50} 
+        ];
+        let bgmNoteIdx = 0;
+        
+        function playBGMSequence() {
+            if (!musicEnabled) return;
+            let note = bgmMelody[bgmNoteIdx];
+            playTone(note.f, 'bgm', note.d * 0.8, 0.15);
+            bgmNoteIdx = (bgmNoteIdx + 1) % bgmMelody.length;
+            bgmTimeout = setTimeout(playBGMSequence, note.d * 1000);
+        }
+
+        function toggleMusic() {
+            musicEnabled = !musicEnabled;
+            document.getElementById('btn-music').innerHTML = musicEnabled ? "🎵 Música: ON" : "🔇 Música: OFF";
+            playClick();
+            if (musicEnabled) {
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                clearTimeout(bgmTimeout);
+                playBGMSequence();
+            } else {
+                clearTimeout(bgmTimeout);
+            }
+        }
+
+        function mostrarMenuJugadores() {
+            actualizarMascota('neutral');
+            document.getElementById('scoreboard').style.display = 'none';
+            document.getElementById('app').innerHTML = `
+                <div class="menu-container">
+                    <h2 style="color: #1e293b; margin-top:0; margin-bottom:12px; font-size:32px; font-weight:700;">Modo de Juego</h2>
+                    <div class="selector-grid">
+                        <button class="btn-accion" style="background: linear-gradient(180deg, #60a5fa 0%, #3b82f6 100%); box-shadow: 0 5px 0px #2563eb;" onclick="playClick(); mostrarMenuDificultad(1)">👤 1 Jugador</button>
+                        <button class="btn-accion" style="background: linear-gradient(180deg, #f87171 0%, #ef4444 100%); box-shadow: 0 5px 0px #dc2626;" onclick="playClick(); mostrarMenuDificultad(2)">👥 2 Jugadores</button>
+                        <button class="btn-accion" style="background: linear-gradient(180deg, #34d399 0%, #10b981 100%); box-shadow: 0 5px 0px #059669;" onclick="playClick(); mostrarPromptMultiplayer()">👨‍👩‍👧‍👦 Multijugador (3 a 5)</button>
+                        <button class="btn-accion" style="background: linear-gradient(180deg, #a855f7 0%, #7c3aed 100%); box-shadow: 0 5px 0px #5b21b6;" onclick="playClick(); mostrarRecords()">🏆 Ver Récords</button>
+                        <button class="btn-accion" style="background: linear-gradient(180deg, #38bdf8 0%, #0284c7 100%); box-shadow: 0 5px 0px #0369a1;" onclick="playClick(); toggleFullscreen()">📺 Pantalla Completa</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function mostrarPromptMultiplayer() {
+            const contenedor = document.getElementById('app');
+            contenedor.innerHTML = `
+                <div class="menu-container">
+                    <h2 style="color: #1e293b; margin-top:0; font-size:32px; font-weight:700;">Cantidad de Jugadores</h2>
+                    <p style="color: #64748b; font-size: 16px; margin-bottom: 15px;">Elige cuántos jugadores participarán (de 3 a 5):</p>
+                    <input type="number" id="input-num-jugadores" min="3" max="5" value="3" style="font-size: 22px; padding: 10px;">
+                    <button class="btn-accion" style="background: linear-gradient(180deg, #34d399 0%, #10b981 100%); box-shadow: 0 5px 0px #059669; margin-top: 10px;" onclick="playClick(); confirmarMultiplayer()">Continuar ➔</button>
+                    <button class="btn-accion" style="background: transparent; color: #64748b; box-shadow: none; border: 2px solid #cbd5e1; margin-top: 10px;" onclick="playClick(); mostrarMenuJugadores()">⬅️ Volver</button>
+                </div>
+            `;
+        }
+
+        function confirmarMultiplayer() {
+            const input = document.getElementById('input-num-jugadores');
+            let val = parseInt(input.value);
+            if (val >= 3 && val <= 5) {
+                mostrarMenuDificultad(val);
+            } else {
+                alert("Por favor ingresa un número entre 3 y 5 jugadores.");
+            }
+        }
+
+        function mostrarRecords() {
+            const contenedor = document.getElementById('app');
+            let records = JSON.parse(localStorage.getItem("preguntados_top_records")) || [];
+            records.sort((a, b) => b.puntos - a.puntos);
+
+            let listaHtml = "";
+            if (records.length === 0) {
+                listaHtml = `<p style="color: #64748b; font-size: 16px; margin: 20px 0;">¡Aún no hay récords guardados! Juega una partida para registrar tu puntaje.</p>`;
+            } else {
+                listaHtml = `<div style="max-height: 220px; overflow-y: auto; margin: 15px 0; text-align: left; border: 2px solid #e2e8f0; border-radius: 15px; padding: 10px;">`;
+                records.slice(0, 10).forEach((rec, idx) => {
+                    let medalla = idx === 0 ? "🥇" : idx === 1 ? "🥈" : idx === 2 ? "🥉" : `${idx + 1}.`;
+                    listaHtml += `
+                        <div style="display: flex; justify-content: space-between; padding: 8px 12px; border-bottom: 1px solid #f1f5f9; font-weight: 700; color: #1e293b;">
+                            <span>${medalla} ${rec.nombre}</span>
+                            <span style="color: #6366f1;">${rec.puntos} ⭐ (${rec.dif})</span>
+                        </div>
+                    `;
+                });
+                listaHtml += `</div>`;
+            }
+
+            contenedor.innerHTML = `
+                <div class="menu-container">
+                    <h2 style="color: #1e293b; margin-top:0; font-size:34px; font-weight:700;">🏆 Mejores Récords</h2>
+                    ${listaHtml}
+                    <button class="btn-accion" style="background: linear-gradient(180deg, #60a5fa 0%, #3b82f6 100%); box-shadow: 0 5px 0px #2563eb; margin-top: 10px;" onclick="playClick(); mostrarMenuJugadores()">⬅️ Volver al Menú</button>
+                </div>
+            `;
+        }
+
+        function mostrarMenuDificultad(n) {
+            numJugadores = n;
+            document.getElementById('app').innerHTML = `
+                <div class="menu-container">
+                    <h2 style="color: #1e293b; margin-top:0; margin-bottom:15px; font-size:34px; font-weight:700;">Dificultad</h2>
+                    <div class="selector-grid">
+                        <button class="btn-accion" style="background: linear-gradient(180deg, #34d399 0%, #10b981 100%); box-shadow: 0 5px 0px #059669;" onclick="playClick(); iniciarJuego('facil')">🟢 Fácil (20 seg)</button>
+                        <button class="btn-accion" style="background: linear-gradient(180deg, #60a5fa 0%, #3b82f6 100%); box-shadow: 0 5px 0px #2563eb;" onclick="playClick(); iniciarJuego('normal')">🔵 Normal (15 seg)</button>
+                        <button class="btn-accion" style="background: linear-gradient(180deg, #fb7185 0%, #f43f5e 100%); box-shadow: 0 5px 0px #e11d48;" onclick="playClick(); iniciarJuego('dificil')">🔴 Difícil (10 seg - Puntos x2)</button>
+                        <button class="btn-accion" style="background: transparent; color: #64748b; box-shadow: 0 5px 0px #cbd5e1; border: 2px solid #cbd5e1;" onclick="playClick(); mostrarMenuJugadores()">⬅️ Volver</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function iniciarJuego(nivel) {
+            dificultad = nivel;
+            if (nivel === 'facil') { tiempoMaximo = 20; multiplicadorPuntos = 1; }
+            else if (nivel === 'normal') { tiempoMaximo = 15; multiplicadorPuntos = 1; }
+            else if (nivel === 'dificil') { tiempoMaximo = 10; multiplicadorPuntos = 2; }
+
+            jugadores = [];
+            for (let i=0; i<numJugadores; i++) {
+                jugadores.push({
+                    nombre: `Jugador ${i+1}`,
+                    puntos: 0,
+                    vidas: 3,
+                    comodinUsado: false,
+                    racha: 0
+                });
+            }
+            turnoActual = 0;
+
+            document.getElementById('scoreboard').style.display = 'flex';
+            mostrarPantallaRuleta();
+        }
+
+        function actualizarUI() {
+            let j = jugadores[turnoActual];
+            document.getElementById('puntuacion').textContent = j.puntos;
+            
+            const rachaBox = document.getElementById('racha-box');
+            const rachaVal = document.getElementById('racha-val');
+            if (j.racha > 0) {
+                rachaBox.style.display = 'flex';
+                rachaVal.textContent = j.racha;
+            } else {
+                rachaBox.style.display = 'none';
+            }
+
+            let corazones = "";
+            for (let i = 0; i < j.vidas; i++) corazones += "❤️";
+            document.getElementById('vidas').textContent = corazones || "❌";
+
+            const ind = document.getElementById('player-indicator');
+            if (numJugadores > 1) {
+                ind.style.display = 'flex';
+                let colors = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#a855f7'];
+                ind.style.background = colors[turnoActual % colors.length];
+                ind.innerHTML = `👤 ${j.nombre}`;
+            } else {
+                ind.style.display = 'none';
+            }
+        }
+
+        function prepararSiguienteTurno() {
+            let vivos = jugadores.filter(p => p.vidas > 0);
+            if (vivos.length === 0) {
+                mostrarGameOverGeneral();
+                return;
+            }
+            
+            do {
+                turnoActual = (turnoActual + 1) % numJugadores;
+            } while(jugadores[turnoActual].vidas <= 0);
+
+            mostrarPantallaRuleta();
+        }
+
+        function mostrarPantallaRuleta() {
+            actualizarMascota('neutral');
+            actualizarUI();
+            const contenedor = document.getElementById('app');
+
+            let iconosHtml = '';
+            sectores.forEach((sec, index) => {
+                const anguloCentro = (index * 45) + 22.5;
+                const rad = (anguloCentro - 90) * (Math.PI / 180);
+                const radioDistancia = 32; 
+                const x = 50 + radioDistancia * Math.cos(rad);
+                const y = 50 + radioDistancia * Math.sin(rad);
+                iconosHtml += `<div class="ruleta-icono" style="top: ${y}%; left: ${x}%; transform: translate(-50%, -50%);">${sec.icono}</div>`;
+            });
+
+            let playerColor = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#a855f7'][turnoActual % 5];
+            let turnoHtml = numJugadores > 1 ? `<div style="background:${playerColor}; color:white; padding:8px 20px; border-radius:99px; display:inline-block; margin-bottom:15px; font-size:18px; font-weight:700; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">👤 Turno de: ${jugadores[turnoActual].nombre}</div>` : '';
+            
+            contenedor.innerHTML = `
+                <div class="ruleta-pantalla-inmersiva">
+                    ${turnoHtml}
+                    <h2>¡GIRA LA RULETA!</h2>
+                    <div class="ruleta-wrapper">
+                        <div class="ruleta-pointer"></div>
+                        <div class="ruleta-rueda" id="rueda">
+                            ${iconosHtml}
+                        </div>
+                        <div class="ruleta-centro" onclick="girarRuleta()" title="¡Haz clic para Girar!">
+                            <div class="willy-girar">GIRAR</div>
+                        </div>
+                    </div>
+                    <div id="categoria-elegida"></div>
+                </div>
+            `;
+        }
+
+        function girarRuleta() {
+            playClick();
+            const rueda = document.getElementById('rueda');
+            const contenedorCat = document.getElementById('categoria-elegida');
+            
+            const indiceAleatorio = Math.floor(Math.random() * sectores.length);
+            const sectorSeleccionado = sectores[indiceAleatorio];
+
+            const gradosCentroSector = (indiceAleatorio * 45) + 22.5;
+            const rotacionObjetivo = 360 - gradosCentroSector;
+            const rotacionActual = gradosTotales % 360;
+            
+            let gradosGiro = rotacionObjetivo - rotacionActual;
+            if (gradosGiro <= 0) gradosGiro += 360;
+            
+            const vueltasCompletas = 360 * 5; 
+            gradosTotales += vueltasCompletas + gradosGiro;
+            
+            rueda.style.transform = `rotate(${gradosTotales}deg)`;
+            
+            contenedorCat.innerHTML = `<span class="texto-girando">Girando la ruleta...</span>`;
+            
+            let ticInterval = setInterval(() => playTic(false), 180);
+            setTimeout(() => clearInterval(ticInterval), 3500);
+
+            setTimeout(() => {
+                if (sectorSeleccionado.tipo === "comodin") {
+                    playWin();
+                    contenedorCat.innerHTML = `
+                        <div class="cat-badge-text" style="border-color: #fbbf24; box-shadow: 0 8px 30px rgba(251, 191, 36, 0.4), inset 0 0 15px rgba(251, 191, 36, 0.3);">
+                            <span style="font-size: 36px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));">🃏</span>
+                            <span style="color: #ffffff; font-size: 28px; letter-spacing: 2px; text-shadow: 0 3px 6px rgba(0,0,0,0.8); -webkit-text-stroke: 1px #0f172a;">¡COMODÍN!</span>
+                        </div>
+                    `;
+                    setTimeout(mostrarSelectorComodin, 1000);
+                } else {
+                    playWin();
+                    contenedorCat.innerHTML = `
+                        <div class="cat-badge-text" style="border-color: ${sectorSeleccionado.color}; box-shadow: 0 8px 30px ${sectorSeleccionado.color}88, inset 0 0 15px ${sectorSeleccionado.color}66;">
+                            <span style="font-size: 36px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));">${sectorSeleccionado.icono}</span>
+                            <span style="color: #ffffff; font-size: 28px; letter-spacing: 2px; text-shadow: 0 3px 6px rgba(0,0,0,0.8); -webkit-text-stroke: 1px #0f172a;">${sectorSeleccionado.nombre.toUpperCase()}</span>
+                        </div>
+                    `;
+                    setTimeout(async () => {
+                        await cargarPreguntaPorCategoria(sectorSeleccionado.nombre);
+                    }, 1500);
+                }
+            }, 3500);
+        }
+
+        function mostrarSelectorComodin() {
+            const contenedor = document.getElementById('app');
+            let gridHtml = '<div class="comodin-grid">';
+            
+            sectores.filter(s => s.tipo !== 'comodin').forEach(sec => {
+                gridHtml += `<button class="btn-categoria-sel" style="background: ${sec.color}; box-shadow: 0 6px 0px ${sec.sombra};" onclick="playClick(); elegirComodin('${sec.nombre}')">
+                    <span style="font-size: 32px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));">${sec.icono}</span>
+                    <span style="letter-spacing: 0.5px;">${sec.nombre}</span>
+                </button>`;
+            });
+            gridHtml += '</div>';
+            contenedor.querySelector('.ruleta-pantalla-inmersiva').innerHTML += gridHtml;
+        }
+
+        async function elegirComodin(cat) {
+            await cargarPreguntaPorCategoria(cat);
+        }
+
+        async function cargarPreguntaPorCategoria(cat) {
+            respondido = false;
+            try {
+                const respuesta = await fetch(`http://127.0.0.1:8000/question/random?categoria=${encodeURIComponent(cat)}`);
+                if (!respuesta.ok) throw new Error("No hay preguntas para esta categoría");
+                
+                const data = await respuesta.json();
+                
+                preguntaActual = {
+                    categoria: data.categoria,
+                    pregunta: data.pregunta,
+                    opciones: data.opciones,
+                    respuesta: data.respuesta
+                };
+                
+                mostrarPregunta();
+            } catch (error) {
+                console.warn("Buscando pregunta aleatoria general debido a un error:", error);
+                try {
+                    const respuestaAlt = await fetch('http://127.0.0.1:8000/question/random');
+                    const dataAlt = await respuestaAlt.json();
+                    
+                    preguntaActual = {
+                        categoria: dataAlt.categoria,
+                        pregunta: dataAlt.pregunta,
+                        opciones: dataAlt.opciones,
+                        respuesta: dataAlt.respuesta
+                    };
+                    
+                    mostrarPregunta();
+                } catch (e) {
+                    console.error("Error crítico al conectar con el backend:", e);
+                    alert("Asegúrate de tener encendido el servidor backend con uvicorn en la terminal.");
+                }
+            }
+        }
+
+        function mostrarPregunta() {
+            actualizarMascota('pensando');
+            const contenedor = document.getElementById('app');
+            let j = jugadores[turnoActual];
+            tiempoRestante = tiempoMaximo;
+            
+            let btnComodinHtml = !j.comodinUsado ? `<button class="btn-accion btn-comodin" onclick="playClick(); usarComodin5050()">🃏 Usar Comodín 50/50</button>` : '';
+
+            contenedor.innerHTML = `
+                <div class="card">
+                    <div class="header-pregunta">
+                        <span class="categoria-badge">${preguntaActual.categoria}</span>
+                        <div class="timer" id="timer-box">⏱️ <span id="tiempo">${tiempoRestante}</span>s</div>
+                    </div>
+                    ${btnComodinHtml}
+                    <div class="pregunta-texto">${preguntaActual.pregunta}</div>
+                    <div id="opciones-container"></div>
+                    <div id="feedback" class="mensaje-feedback"></div>
+                    <button class="btn-accion btn-continuar" id="btn-siguiente" style="display:none;" onclick="playClick(); prepararSiguienteTurno()">Continuar ➔</button>
+                </div>
+            `;
+
+            const opcionesContainer = document.getElementById('opciones-container');
+            preguntaActual.opciones.forEach((opcion, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'opcion';
+                btn.innerHTML = `<span>${opcion}</span> <span class="tecla-badge">[${index + 1}]</span>`;
+                btn.onclick = () => { playClick(); verificarRespuesta(opcion, btn); };
+                opcionesContainer.appendChild(btn);
+            });
+
+            iniciarTemporizador();
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (!preguntaActual) return;
+            if (!respondido) {
+                const keyMap = { '1': 0, '2': 1, '3': 2, '4': 3 };
+                if (e.key in keyMap) {
+                    const botones = document.querySelectorAll('.opcion');
+                    const idx = keyMap[e.key];
+                    if (botones[idx] && !botones[idx].disabled) {
+                        botones[idx].click();
+                    }
+                }
+            } else {
+                if (e.key === 'Enter') {
+                    const btnSiguiente = document.getElementById('btn-siguiente');
+                    if (btnSiguiente && btnSiguiente.style.display !== 'none') {
+                        btnSiguiente.click();
+                    }
+                }
+            }
+        });
+
+        function usarComodin5050() {
+            let j = jugadores[turnoActual];
+            if (j.comodinUsado || respondido) return;
+            j.comodinUsado = true;
+            playWin();
+
+            const valorCorrecto = preguntaActual.respuesta || "";
+            const limpiar = (t) => t ? t.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim() : "";
+            
+            const botones = Array.from(document.querySelectorAll('.opcion'));
+            let ocultados = 0;
+            botones.forEach(btn => {
+                const textoOpcion = btn.querySelector('span').textContent;
+                if (limpiar(textoOpcion) !== limpiar(valorCorrecto) && ocultados < 2) {
+                    btn.style.display = 'none';
+                    ocultados++;
+                }
+            });
+
+            const btnComodinEl = document.querySelector('.btn-comodin');
+            if (btnComodinEl) btnComodinEl.style.display = 'none';
+        }
+
+        function iniciarTemporizador() {
+            clearInterval(temporizador);
+            temporizador = setInterval(() => {
+                tiempoRestante--;
+                const elemTiempo = document.getElementById('tiempo');
+                const timerBox = document.getElementById('timer-box');
+                
+                if (elemTiempo) elemTiempo.textContent = tiempoRestante;
+
+                if (timerBox) {
+                    if (tiempoRestante <= 4) {
+                        timerBox.classList.add('danger');
+                        playTic(true); 
+                    } else {
+                        timerBox.classList.remove('danger');
+                        playTic(false);
+                    }
+                }
+
+                if (tiempoRestante <= 0) {
+                    clearInterval(temporizador);
+                    tiempoAgotado();
+                }
+            }, 1000);
+        }
+
+        function tiempoAgotado() {
+            if (respondido) return;
+            respondido = true;
+            jugadores[turnoActual].vidas--;
+            jugadores[turnoActual].racha = 0; 
+            playLose();
+            actualizarMascota('triste');
+            actualizarUI();
+
+            const card = document.querySelector('.card');
+            if (card) {
+                card.classList.add('shake');
+                setTimeout(() => card.classList.remove('shake'), 400);
+            }
+
+            const valorCorrecto = preguntaActual.respuesta || "";
+            const limpiar = (t) => t ? t.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim() : "";
+            
+            document.querySelectorAll('.opcion').forEach(btn => {
+                btn.style.display = 'flex';
+                btn.disabled = true;
+                const textoOpcion = btn.querySelector('span').textContent;
+                if (limpiar(textoOpcion) === limpiar(valorCorrecto)) {
+                    btn.classList.add('correcta');
+                }
+            });
+
+            const feedback = document.getElementById('feedback');
+            feedback.style.color = '#e11d48';
+            feedback.textContent = '¡Tiempo agotado! ⌛ (-1 Vida)';
+
+            const btnSiguiente = document.getElementById('btn-siguiente');
+            if (btnSiguiente) btnSiguiente.style.display = 'block';
+        }
+
+        function verificarRespuesta(opcionElegida, botonSeleccionado) {
+            if (respondido) return;
+            respondido = true;
+            clearInterval(temporizador);
+
+            let j = jugadores[turnoActual];
+            const valorCorrecto = preguntaActual.respuesta || "";
+            const limpiar = (t) => t ? t.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim() : "";
+            
+            const textoElegido = opcionElegida.includes(' [') ? opcionElegida.split(' [')[0] : opcionElegida;
+            const esAcertado = (limpiar(textoElegido) === limpiar(valorCorrecto));
+            const feedback = document.getElementById('feedback');
+
+            document.querySelectorAll('.opcion').forEach(btn => {
+                btn.style.display = 'flex';
+                btn.disabled = true;
+                const textoOpcion = btn.querySelector('span').textContent;
+                if (limpiar(textoOpcion) === limpiar(valorCorrecto)) {
+                    btn.classList.add('correcta');
+                }
+            });
+
+            if (esAcertado) {
+                playWin();
+                actualizarMascota('feliz');
+                botonSeleccionado.classList.add('correcta');
+                
+                j.racha++;
+                let puntosBase = 10 * multiplicadorPuntos;
+                let bonusRacha = j.racha > 1 ? (j.racha - 1) * 5 : 0; 
+                let puntosTotales = puntosBase + bonusRacha;
+                
+                j.puntos += puntosTotales;
+                actualizarUI();
+
+                if (j.racha > 1) {
+                    feedback.style.color = '#10b981';
+                    feedback.textContent = `¡Correcto! 🎉 (¡Racha 🔥 x${j.racha} +${puntosTotales} pts!)`;
+                } else {
+                    feedback.style.color = '#10b981';
+                    feedback.textContent = '¡Correcto! 🎉';
+                }
+
+                confetti({ particleCount: 150, spread: 90, origin: { y: 0.6 }, zIndex: 99999 });
+            } else {
+                playLose();
+                actualizarMascota('triste');
+                j.racha = 0; 
+                botonSeleccionado.classList.add('incorrecta');
+                feedback.style.color = '#f43f5e';
+                feedback.textContent = '¡Incorrecto! ❌ (-1 Vida)';
+                j.vidas--;
+                actualizarUI();
+
+                const card = document.querySelector('.card');
+                if (card) {
+                    card.classList.add('shake');
+                    setTimeout(() => card.classList.remove('shake'), 400);
+                }
+            }
+
+            const btnSiguiente = document.getElementById('btn-siguiente');
+            if (btnSiguiente) btnSiguiente.style.display = 'block';
+        }
+
+        function mostrarGameOverGeneral() {
+            clearInterval(temporizador);
+            playLose();
+            actualizarMascota('triste');
+            document.getElementById('scoreboard').style.display = 'none';
+            const contenedor = document.getElementById('app');
+
+            let puntuacionFinalHtml = "";
+            let nombreDefault = "Anónimo";
+
+            if (numJugadores === 1) {
+                let j = jugadores[0];
+                nombreDefault = j.nombre;
+                puntuacionFinalHtml = `<p style="font-size: 26px; color: #1e293b; font-weight: 700; margin: 10px 0;">Puntuación final: ${j.puntos} ⭐</p>`;
+            } else {
+                let ranking = [...jugadores].sort((a, b) => b.puntos - a.puntos);
+                nombreDefault = ranking[0].nombre;
+                puntuacionFinalHtml = `<p style="font-size: 26px; color: #1e293b; font-weight: 700; margin: 10px 0;">Ganador: ${ranking[0].nombre} (${ranking[0].puntos} ⭐)</p>`;
+            }
+
+            contenedor.innerHTML = `
+                <div class="gameover-container">
+                    <h2 style="color: #f43f5e; margin-top:0; font-size:38px; font-weight:700;">¡Partida Terminada!</h2>
+                    
+                    <div style="font-size: 80px; margin: 5px 0; animation: floatMascot 3s ease-in-out infinite;">
+                        🥺💔
+                    </div>
+
+                    ${puntuacionFinalHtml}
+
+                    <label style="font-weight: 700; font-size: 16px; color: #475569; display:block; text-align:left; margin-top: 15px; margin-bottom:10px;">Guardar Ganador en Récords:</label>
+                    <input type="text" id="nombre-jugador" value="${nombreDefault}" maxlength="15">
+                    
+                    <div class="botones-grid">
+                        <div class="botones-row">
+                            <button id="btn-guardar" class="btn-accion" style="margin-top:0; background: linear-gradient(180deg, #34d399 0%, #10b981 100%); box-shadow: 0 5px 0px #059669;" onclick="playClick(); guardarPuntaje()">GUARDAR</button>
+                            <button class="btn-accion" style="margin-top:0; background: linear-gradient(180deg, #f87171 0%, #ef4444 100%); box-shadow: 0 5px 0px #dc2626;" onclick="playClick(); salirSinGuardar()">SALIR</button>
+                        </div>
+                        <button id="btn-guardar-salir" class="btn-accion" style="margin-top:0;" onclick="playClick(); guardarPuntajeYSalir()">GUARDAR Y SALIR</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function ejecutarGuardado() {
+            const input = document.getElementById('nombre-jugador');
+            let nombre = input.value.trim() || "Anónimo";
+            let puntosFinales = [...jugadores].sort((a, b) => b.puntos - a.puntos)[0].puntos;
+            
+            let records = JSON.parse(localStorage.getItem("preguntados_top_records")) || [];
+            records.push({ nombre: nombre, puntos: puntosFinales, dif: dificultad });
+            localStorage.setItem("preguntados_top_records", JSON.stringify(records));
+        }
+
+        function guardarPuntaje() {
+            ejecutarGuardado();
+            alert("¡Puntaje guardado con éxito en los récords! 🏆");
+            document.getElementById('btn-guardar').disabled = true;
+            document.getElementById('btn-guardar-salir').disabled = true;
+        }
+
+        function guardarPuntajeYSalir() {
+            if (!document.getElementById('btn-guardar-salir').disabled) {
+                ejecutarGuardado();
+            }
+            mostrarMenuJugadores();
+        }
+
+        function salirSinGuardar() {
+            mostrarMenuJugadores();
+        }
+
+        mostrarMenuJugadores();
+    </script>
+
+</body>
+</html>
