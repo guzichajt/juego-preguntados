@@ -1,0 +1,10 @@
+{
+  "preguntas": [
+    {
+      "categoria": "Matemáticas",
+      "pregunta": "¿Cuánto es 8 x 7?",
+      "opciones": ["54", "56", "64", "48"],
+      "correcta": "56"
+    }
+  ]
+}

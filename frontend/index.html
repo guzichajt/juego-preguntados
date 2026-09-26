@@ -523,17 +523,6 @@
             50% { transform: scale(1.06); }
         }
 
-        .stats-box {
-            background: #f8fafc;
-            border-radius: 20px;
-            padding: 15px;
-            margin: 15px 0;
-            text-align: left;
-            font-size: 16px;
-            color: #475569;
-            border: 2px solid #e2e8f0;
-        }
-
         input[type="text"], input[type="number"] {
             width: 100%;
             padding: 14px;
@@ -593,6 +582,11 @@
     <div id="app"></div>
 
     <script>
+        // Detección automática de IP y red local para PC o Celular
+        const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+            ? 'http://127.0.0.1:8001'
+            : 'http://192.168.1.6:8001';
+
         const starsContainer = document.getElementById('stars-container');
         for (let i = 0; i < 50; i++) {
             const star = document.createElement('div');
@@ -1022,7 +1016,7 @@
             await cargarPreguntaPorCategoria(cat);
         }
 
-        // --- VALIDACIÓN DE CONTRATO Y GESTIÓN DE ERRORES/TIMEOUTS (Puerto 8001 vía localhost) ---
+        // --- VALIDACIÓN DE CONTRATO Y GESTIÓN DE ERRORES/TIMEOUTS ---
         function validarContratoPregunta(data) {
             if (!data || typeof data !== 'object') return false;
             if (!data.pregunta || typeof data.pregunta !== 'string') return false;
@@ -1056,7 +1050,7 @@
             `;
 
             try {
-                const respuesta = await fetchConTimeout(`http://localhost:8001/question/random?categoria=${encodeURIComponent(cat)}`, {}, 5000);
+                const respuesta = await fetchConTimeout(`${API_BASE_URL}/question/random?categoria=${encodeURIComponent(cat)}`, {}, 5000);
                 if (!respuesta.ok) throw new Error("Error HTTP: " + respuesta.status);
                 
                 const data = await respuesta.json();
@@ -1073,7 +1067,7 @@
             } catch (error) {
                 console.warn("Fallo específico por categoría, intentando comodín general:", error);
                 try {
-                    const respuestaAlt = await fetchConTimeout('http://localhost:8001/question/random', {}, 5000);
+                    const respuestaAlt = await fetchConTimeout(`${API_BASE_URL}/question/random`, {}, 5000);
                     if (!respuestaAlt.ok) throw new Error("Error HTTP alternativo");
                     
                     const dataAlt = await respuestaAlt.json();
@@ -1092,7 +1086,7 @@
                         <div class="menu-container" style="border: 3px solid #f43f5e; background: #fff1f2;">
                             <h2 style="color: #e11d48; margin-top: 0; font-size: 30px;">⚠️ Error de Conexión</h2>
                             <p style="color: #475569; font-size: 16px; margin: 15px 0;">No se pudo comunicar con el servidor FastAPI (o la solicitud tardó demasiado).</p>
-                            <p style="color: #64748b; font-size: 14px; margin-bottom: 20px;">Verifica que el servidor backend esté encendido en <code>http://localhost:8001</code>.</p>
+                            <p style="color: #64748b; font-size: 14px; margin-bottom: 20px;">Verifica que el servidor backend esté encendido en <code>${API_BASE_URL}</code>.</p>
                             <button class="btn-accion" style="background: linear-gradient(180deg, #f87171 0%, #ef4444 100%); box-shadow: 0 5px 0px #dc2626;" onclick="cargarPreguntaPorCategoria('${cat}')">🔄 Reintentar</button>
                             <button class="btn-accion" style="background: transparent; color: #64748b; box-shadow: none; border: 2px solid #cbd5e1; margin-top: 10px;" onclick="mostrarPantallaRuleta()">⬅️ Volver a la Ruleta</button>
                         </div>
