@@ -8,10 +8,7 @@
     <!-- Librería de Confeti -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
-        /* Corrección de caja para centrado perfecto */
-        *, *::before, *::after {
-            box-sizing: border-box;
-        }
+        *, *::before, *::after { box-sizing: border-box; }
 
         :root {
             --bg-gradient: radial-gradient(circle at 50% 30%, #1e1b4b 0%, #0f172a 70%, #020617 100%);
@@ -47,7 +44,6 @@
         }
         .shake { animation: shake 0.4s ease-in-out; }
 
-        /* Fondo de estrellas TITILANDO */
         .stars {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -66,7 +62,6 @@
             100% { opacity: 0.1; transform: scale(0.5); box-shadow: 0 0 0px rgba(255,255,255,0); }
         }
 
-        /* --- TÍTULO GIGANTE CON LILITA ONE --- */
         .logo-container {
             display: flex;
             align-items: center;
@@ -110,7 +105,6 @@
             100% { transform: scale(1.04); filter: drop-shadow(0 8px 0px #d84315) drop-shadow(0 12px 25px rgba(255, 179, 0, 0.6)); }
         }
 
-        /* --- SCOREBOARD CRISTALINO --- */
         .scoreboard {
             display: flex;
             gap: 12px;
@@ -151,7 +145,6 @@
             padding: 8px 24px;
         }
 
-        /* --- TARJETA PRINCIPAL --- */
         .card, .menu-container, .gameover-container {
             background: var(--card-bg);
             color: var(--text-main);
@@ -179,7 +172,6 @@
             to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
-        /* --- RULETA INMERSIVA --- */
         .ruleta-pantalla-inmersiva {
             display: flex;
             flex-direction: column;
@@ -246,8 +238,8 @@
         .ruleta-icono {
             position: absolute;
             font-size: 40px; 
-            width: 65px;     
-            height: 65px;    
+            width: 65px;    
+            height: 65px;   
             display: flex;
             align-items: center;
             justify-content: center;
@@ -289,7 +281,6 @@
             margin: 0;
         }
 
-        /* BANNER DE CATEGORÍA FLOTANTE */
         #categoria-elegida {
             margin: 15px 0 0 0;
             min-height: 55px;
@@ -331,7 +322,6 @@
             to { opacity: 1; }
         }
 
-        /* --- MENÚ JUGADORES Y DIFICULTAD --- */
         .selector-grid {
             display: flex;
             flex-direction: column;
@@ -340,7 +330,6 @@
             width: 100%;
         }
 
-        /* --- GRID HORIZONTAL COMPACTO PARA EL COMODÍN --- */
         .comodin-grid {
             display: flex;
             flex-wrap: wrap;
@@ -375,7 +364,6 @@
         .btn-categoria-sel:hover { transform: translateY(-3px) scale(1.05); filter: brightness(1.15); box-shadow: 0 8px 15px rgba(0,0,0,0.4); }
         .btn-categoria-sel:active { transform: translateY(4px); box-shadow: 0 2px 0px rgba(0,0,0,0.3) !important; }
 
-        /* --- PREGUNTAS Y OPCIONES COMPACTADAS --- */
         .header-pregunta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
 
         .categoria-badge {
@@ -472,7 +460,6 @@
         }
         .opcion.incorrecta .tecla-badge { background: rgba(255,255,255,0.2); color: white; border-color: transparent; }
 
-        /* Botones Acción Generales */
         .btn-accion {
             width: 100%;
             padding: 13px 15px; 
@@ -559,34 +546,18 @@
         <h1>Preguntados</h1>
     </div>
 
-    <!-- BOTONERA SUPERIOR CON COLORES DISTINTIVOS Y FUEGUITO NARANJA -->
     <div class="scoreboard" id="scoreboard" style="display: none;">
         <div class="score-box" id="player-indicator" style="display:none; color:white; border-color:transparent;"></div>
-        
-        <!-- Puntos: Ámbar / Dorado -->
         <div class="score-box" style="background: linear-gradient(180deg, rgba(251,191,36,0.3) 0%, rgba(251,191,36,0.1) 100%); border-color: #fbbf24;">⭐ Puntos: <span id="puntuacion">0</span></div>
-        
-        <!-- Racha: Naranja Fuego Vibrante -->
         <div class="score-box" id="racha-box" style="display:none; background: linear-gradient(180deg, rgba(249,115,22,0.35) 0%, rgba(249,115,22,0.1) 100%); border-color: #f97316;">🔥 Racha: <span id="racha-val">0</span></div>
-        
-        <!-- Vidas: Rojo Carmesí -->
         <div class="score-box" style="background: linear-gradient(180deg, rgba(239,68,68,0.3) 0%, rgba(239,68,68,0.1) 100%); border-color: #ef4444;">Vidas: <span id="vidas">❤️❤️❤️</span></div>
-        
-        <!-- Sonido: Azul Suave -->
         <div class="score-box" id="btn-sound" style="background: linear-gradient(180deg, rgba(59,130,246,0.3) 0%, rgba(59,130,246,0.1) 100%); border-color: #3b82f6;" onclick="toggleSound()">🔊 Sonido: ON</div>
-        
-        <!-- Música: Morado Suave -->
         <div class="score-box" id="btn-music" style="background: linear-gradient(180deg, rgba(168,85,247,0.3) 0%, rgba(168,85,247,0.1) 100%); border-color: #a855f7;" onclick="toggleMusic()">🎵 Música: OFF</div>
     </div>
 
     <div id="app"></div>
 
     <script>
-        // Detección automática de IP y red local para PC o Celular
-        const API_BASE_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-            ? 'http://127.0.0.1:8001'
-            : 'http://192.168.1.6:8001';
-
         const starsContainer = document.getElementById('stars-container');
         for (let i = 0; i < 50; i++) {
             const star = document.createElement('div');
@@ -651,7 +622,6 @@
             confetti({ particleCount: 50, spread: 60, origin: { y: 0.3 }, zIndex: 9999 });
         }
 
-        // --- AUDIO ---
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         function playTone(freq, type, duration, vol=0.3) {
             if (!soundEnabled && type !== 'bgm') return;
@@ -1016,25 +986,11 @@
             await cargarPreguntaPorCategoria(cat);
         }
 
-        // --- VALIDACIÓN DE CONTRATO Y GESTIÓN DE ERRORES/TIMEOUTS ---
         function validarContratoPregunta(data) {
             if (!data || typeof data !== 'object') return false;
             if (!data.pregunta || typeof data.pregunta !== 'string') return false;
             if (!Array.isArray(data.opciones) || data.opciones.length < 2) return false;
             return true;
-        }
-
-        async function fetchConTimeout(url, opciones = {}, timeout = 5000) {
-            const controller = new AbortController();
-            const id = setTimeout(() => controller.abort(), timeout);
-            try {
-                const response = await fetch(url, { ...opciones, signal: controller.signal });
-                clearTimeout(id);
-                return response;
-            } catch (err) {
-                clearTimeout(id);
-                throw err;
-            }
         }
 
         async function cargarPreguntaPorCategoria(cat) {
@@ -1045,15 +1001,24 @@
                 <div class="menu-container" style="padding: 40px;">
                     <div class="mascota-avatar" style="font-size: 60px; margin-bottom: 15px;">🤔</div>
                     <h2 style="color: #1e293b; margin: 0; font-size: 28px;">Buscando pregunta de ${cat}...</h2>
-                    <p style="color: #64748b; font-size: 16px; margin-top: 10px;">Conectando con el servidor...</p>
+                    <p style="color: #64748b; font-size: 16px; margin-top: 10px;">Cargando preguntas locales...</p>
                 </div>
             `;
 
             try {
-                const respuesta = await fetchConTimeout(`${API_BASE_URL}/question/random?categoria=${encodeURIComponent(cat)}`, {}, 5000);
-                if (!respuesta.ok) throw new Error("Error HTTP: " + respuesta.status);
+                const respuesta = await fetch('./preguntas.json');
+                if (!respuesta.ok) throw new Error("No se pudo cargar preguntas.json");
                 
-                const data = await respuesta.json();
+                const dataJson = await respuesta.json();
+                const lista = Array.isArray(dataJson) ? dataJson : (dataJson.preguntas || []);
+                
+                // Filtrar por categoría o tomar cualquiera si no hay exactas
+                let filtradas = lista.filter(p => p.categoria && p.categoria.toLowerCase() === cat.toLowerCase());
+                let pool = filtradas.length > 0 ? filtradas : lista;
+                
+                if (pool.length === 0) throw new Error("No hay preguntas disponibles");
+
+                let data = pool[Math.floor(Math.random() * pool.length)];
                 if (!validarContratoPregunta(data)) throw new Error("Contrato de pregunta inválido");
                 
                 preguntaActual = {
@@ -1065,33 +1030,15 @@
                 };
                 mostrarPregunta();
             } catch (error) {
-                console.warn("Fallo específico por categoría, intentando comodín general:", error);
-                try {
-                    const respuestaAlt = await fetchConTimeout(`${API_BASE_URL}/question/random`, {}, 5000);
-                    if (!respuestaAlt.ok) throw new Error("Error HTTP alternativo");
-                    
-                    const dataAlt = await respuestaAlt.json();
-                    if (!validarContratoPregunta(dataAlt)) throw new Error("Contrato alternativo inválido");
-                    
-                    preguntaActual = {
-                        id: dataAlt.id || 1,
-                        categoria: dataAlt.categoria || cat,
-                        pregunta: dataAlt.pregunta,
-                        opciones: dataAlt.opciones,
-                        respuesta: dataAlt.respuesta || dataAlt.correcta || dataAlt.opciones[0]
-                    };
-                    mostrarPregunta();
-                } catch (e) {
-                    contenedor.innerHTML = `
-                        <div class="menu-container" style="border: 3px solid #f43f5e; background: #fff1f2;">
-                            <h2 style="color: #e11d48; margin-top: 0; font-size: 30px;">⚠️ Error de Conexión</h2>
-                            <p style="color: #475569; font-size: 16px; margin: 15px 0;">No se pudo comunicar con el servidor FastAPI (o la solicitud tardó demasiado).</p>
-                            <p style="color: #64748b; font-size: 14px; margin-bottom: 20px;">Verifica que el servidor backend esté encendido en <code>${API_BASE_URL}</code>.</p>
-                            <button class="btn-accion" style="background: linear-gradient(180deg, #f87171 0%, #ef4444 100%); box-shadow: 0 5px 0px #dc2626;" onclick="cargarPreguntaPorCategoria('${cat}')">🔄 Reintentar</button>
-                            <button class="btn-accion" style="background: transparent; color: #64748b; box-shadow: none; border: 2px solid #cbd5e1; margin-top: 10px;" onclick="mostrarPantallaRuleta()">⬅️ Volver a la Ruleta</button>
-                        </div>
-                    `;
-                }
+                console.error("Error al cargar preguntas locales:", error);
+                contenedor.innerHTML = `
+                    <div class="menu-container" style="border: 3px solid #f43f5e; background: #fff1f2;">
+                        <h2 style="color: #e11d48; margin-top: 0; font-size: 30px;">⚠️ Error de Carga</h2>
+                        <p style="color: #475569; font-size: 16px; margin: 15px 0;">No se pudo leer el archivo <code>preguntas.json</code> localmente.</p>
+                        <button class="btn-accion" style="background: linear-gradient(180deg, #f87171 0%, #ef4444 100%); box-shadow: 0 5px 0px #dc2626;" onclick="cargarPreguntaPorCategoria('${cat}')">🔄 Reintentar</button>
+                        <button class="btn-accion" style="background: transparent; color: #64748b; box-shadow: none; border: 2px solid #cbd5e1; margin-top: 10px;" onclick="mostrarPantallaRuleta()">⬅️ Volver a la Ruleta</button>
+                    </div>
+                `;
             }
         }
 
