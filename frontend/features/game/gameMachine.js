@@ -2,7 +2,7 @@ export function createGameInitialState(numPlayers, difficulty) {
     let tiempoMaximo = 15;
     let multiplicadorPuntos = 1;
 
-    if (difficulty === 'facil') { tiempoMaximo = 20; }
+    if (difficulty === 'easy') { timeMaximum = 20; }
     else if (difficulty === 'dificil') { tiempoMaximo = 10; multiplicadorPuntos = 2; }
 
     const jugadores = [];
